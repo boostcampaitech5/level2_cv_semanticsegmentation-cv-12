@@ -6,6 +6,7 @@ import os
 from .base import set_seed
 from loss import dice_coef
 from dataset import CLASSES
+import wandb
 
 def train(model, 
           data_loader, 
@@ -51,6 +52,10 @@ def train(model,
                     f'Loss: {round(loss.item(),4)}'
                 )
         scheduler.step()
+
+        wandb.log({
+            'train_loss': loss.item(),
+        })
              
         # validation 주기에 따른 loss 출력 및 best model 저장
         if (epoch + 1) % val_every == 0:
@@ -61,6 +66,11 @@ def train(model,
                 print(f"Save model in {save_dir}")
                 best_dice = dice
                 save_model(model, epoch, save_dir, save_name)
+            
+            
+            wandb.log({
+                'val_dice': dice,
+            })
 
 
 def validation(epoch, 
