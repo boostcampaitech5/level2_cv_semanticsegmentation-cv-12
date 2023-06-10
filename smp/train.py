@@ -10,6 +10,7 @@ from torchvision import models, transforms
 # visualization
 from dataset import XRayDataset
 from torch.optim import lr_scheduler
+import segmentation_models_pytorch as smp
 
 from utils.base import set_seed
 from utils.train import train
@@ -67,24 +68,25 @@ optimizer = optim.Adam(params=model.parameters(), lr=lr, weight_decay=1e-6)
 
 scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0.001)
 
-set_seed(random_seed)
+if __name__ == "__main__":
+    set_seed(random_seed)
 
-wandb.login()
-wandb.init(
-    project = 'Semantic Segmentation',
-    name='smp',
-    entity='ganddddi_datacentric',
-    # resume= True if args.resume else False
-)
+    wandb.login()
+    wandb.init(
+        project = 'Semantic Segmentation',
+        name='smp',
+        entity='ganddddi_datacentric',
+        # resume= True if args.resume else False
+    )
 
-train(model, 
-      train_loader, 
-      valid_loader, 
-      num_epochs, 
-      criterion, 
-      optimizer, 
-      scheduler, 
-      random_seed, 
-      val_every, 
-      save_dir, 
-      save_name)
+    train(model, 
+        train_loader, 
+        valid_loader, 
+        num_epochs, 
+        criterion, 
+        optimizer, 
+        scheduler, 
+        random_seed, 
+        val_every, 
+        save_dir, 
+        save_name)

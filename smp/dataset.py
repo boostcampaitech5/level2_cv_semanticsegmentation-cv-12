@@ -9,8 +9,6 @@ from sklearn.model_selection import GroupKFold
 import torch
 from torch.utils.data import Dataset
 
-IMAGE_ROOT = "/opt/ml/input/data/train/DCM"
-LABEL_ROOT = "/opt/ml/input/data/train/outputs_json"
 CLASSES = [
     'finger-1', 'finger-2', 'finger-3', 'finger-4', 'finger-5',
     'finger-6', 'finger-7', 'finger-8', 'finger-9', 'finger-10',
@@ -22,31 +20,34 @@ CLASSES = [
 CLASS2IND = {v: i for i, v in enumerate(CLASSES)}
 IND2CLASS = {v: k for k, v in CLASS2IND.items()}
 
-pngs = {
-    os.path.relpath(os.path.join(root, fname), start=IMAGE_ROOT)
-    for root, _dirs, files in os.walk(IMAGE_ROOT)
-    for fname in files
-    if os.path.splitext(fname)[1].lower() == ".png"
-}
-
-jsons = {
-    os.path.relpath(os.path.join(root, fname), start=LABEL_ROOT)
-    for root, _dirs, files in os.walk(LABEL_ROOT)
-    for fname in files
-    if os.path.splitext(fname)[1].lower() == ".json"
-}
-
-jsons_fn_prefix = {os.path.splitext(fname)[0] for fname in jsons}
-pngs_fn_prefix = {os.path.splitext(fname)[0] for fname in pngs}
-
-assert len(jsons_fn_prefix - pngs_fn_prefix) == 0
-assert len(pngs_fn_prefix - jsons_fn_prefix) == 0
-
-pngs = sorted(pngs)
-jsons = sorted(jsons)
-
 class XRayDataset(Dataset):
     def __init__(self, is_train=True, transforms=None):
+
+        self.IMAGE_ROOT = "/opt/ml/input/data/train/DCM"
+        self.LABEL_ROOT = "/opt/ml/input/data/train/outputs_json"
+        pngs = {
+            os.path.relpath(os.path.join(root, fname), start=self.IMAGE_ROOT)
+            for root, _dirs, files in os.walk(self.IMAGE_ROOT)
+            for fname in files
+            if os.path.splitext(fname)[1].lower() == ".png"
+        }
+
+        jsons = {
+            os.path.relpath(os.path.join(root, fname), start=self.LABEL_ROOT)
+            for root, _dirs, files in os.walk(self.LABEL_ROOT)
+            for fname in files
+            if os.path.splitext(fname)[1].lower() == ".json"
+        }
+
+        jsons_fn_prefix = {os.path.splitext(fname)[0] for fname in jsons}
+        pngs_fn_prefix = {os.path.splitext(fname)[0] for fname in pngs}
+
+        assert len(jsons_fn_prefix - pngs_fn_prefix) == 0
+        assert len(pngs_fn_prefix - jsons_fn_prefix) == 0
+
+        pngs = sorted(pngs)
+        jsons = sorted(jsons)
+
         _filenames = np.array(pngs)
         _labelnames = np.array(jsons)
         
@@ -91,13 +92,13 @@ class XRayDataset(Dataset):
     
     def __getitem__(self, item):
         image_name = self.filenames[item]
-        image_path = os.path.join(IMAGE_ROOT, image_name)
+        image_path = os.path.join(self.IMAGE_ROOT, image_name)
         
         image = cv2.imread(image_path)
         image = image / 255.
         
         label_name = self.labelnames[item]
-        label_path = os.path.join(LABEL_ROOT, label_name)
+        label_path = os.path.join(self.LABEL_ROOT, label_name)
         
         # process a label of shape (H, W, NC)
         label_shape = tuple(image.shape[:2]) + (len(CLASSES), )
@@ -134,3 +135,44 @@ class XRayDataset(Dataset):
         label = torch.from_numpy(label).float()
             
         return image, label
+
+class XRayInferenceDataset(Dataset):
+    def __init__(self, transforms=None):
+        
+        self.IMAGE_ROOT = "/opt/ml/input/data/test/DCM"
+
+        pngs = {
+            os.path.relpath(os.path.join(root, fname), start=self.IMAGE_ROOT)
+            for root, _dirs, files in os.walk(self.IMAGE_ROOT)
+            for fname in files
+            if os.path.splitext(fname)[1].lower() == ".png"
+        }
+
+        _filenames = pngs
+        _filenames = np.array(sorted(_filenames))
+        
+        self.filenames = _filenames
+        self.transforms = transforms
+    
+    def __len__(self):
+        return len(self.filenames)
+    
+    def __getitem__(self, item):
+        image_name = self.filenames[item]
+        image_path = os.path.join(self.IMAGE_ROOT, image_name)
+        
+        image = cv2.imread(image_path)
+        image = image / 255.
+        
+        if self.transforms is not None:
+            inputs = {"image": image}
+            result = self.transforms(**inputs)
+            image = result["image"]
+
+        # to tenser will be done later
+        image = image.transpose(2, 0, 1)    # make channel first
+        
+        image = torch.from_numpy(image).float()
+            
+        return image, image_name
+    

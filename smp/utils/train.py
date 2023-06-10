@@ -127,6 +127,8 @@ def save_model(model,
                epoch, 
                save_dir='/opt/ml/input/result/',
                save_name='fcn_resnet50_best_model'):
+    if not os.path.isdir(os.path.join(save_dir, save_name)):                                                           
+        os.mkdir(os.path.join(save_dir, save_name))
     file_name = f'{save_name}_epoch{epoch+1}.pt'
-    output_path = os.path.join(save_dir, file_name)
+    output_path = os.path.join(save_dir, save_name, file_name)
     torch.save(model, output_path)
