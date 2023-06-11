@@ -22,11 +22,11 @@ lr = 1e-4
 random_seed = 21
 
 num_epochs = 200    # CHANGE
-val_every = 1 #10
+val_every = 5 #10
 
 save_dir = "/opt/ml/input/result/smp/"
 
-save_name = 'fcn_resnet101_hi'
+save_name = 'UnetPlusPlus_efficientnet-b0'
 
 if not os.path.isdir(save_dir):                                                           
     os.mkdir(save_dir)
@@ -38,12 +38,13 @@ train_dataset = XRayDataset(is_train=True, transforms=tf)
 valid_dataset = XRayDataset(is_train=False, transforms=tf)
 
 # image, label = train_dataset[0]
+# image2, label2 = valid_dataset[0]
 
 train_loader = DataLoader(
     dataset=train_dataset, 
     batch_size=batch_size,
     shuffle=True,
-    num_workers=8,
+    num_workers=4,
     drop_last=True,
 )
 
@@ -51,14 +52,20 @@ valid_loader = DataLoader(
     dataset=valid_dataset, 
     batch_size=2,
     shuffle=False,
-    num_workers=2,
+    num_workers=0,
     drop_last=False
 )
 
-model = models.segmentation.fcn_resnet101(pretrained=True)
-
+model = smp.UnetPlusPlus( ##UnetPlusPlus
+    encoder_name="efficientnet-b0", # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+    encoder_weights="imagenet",     # use `imagenet` pre-trained weights for encoder initialization
+    in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+    classes=29,                     # model output channels (number of classes in your dataset)
+)
+## torchvision
+# model = models.segmentation.fcn_resnet101(pretrained=True)
 # output class를 data set에 맞도록 수정
-model.classifier[4] = nn.Conv2d(512, len(CLASSES), kernel_size=1)
+# model.classifier[4] = nn.Conv2d(512, len(CLASSES), kernel_size=1)
 
 # Loss function 정의
 criterion = nn.BCEWithLogitsLoss()
@@ -66,7 +73,7 @@ criterion = nn.BCEWithLogitsLoss()
 # Optimizer 정의
 optimizer = optim.Adam(params=model.parameters(), lr=lr, weight_decay=1e-6)
 
-scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0.001)
+scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0)
 
 if __name__ == "__main__":
     set_seed(random_seed)
@@ -74,7 +81,7 @@ if __name__ == "__main__":
     wandb.login()
     wandb.init(
         project = 'Semantic Segmentation',
-        name='smp',
+        name=save_name,
         entity='ganddddi_datacentric',
         # resume= True if args.resume else False
     )
@@ -90,3 +97,5 @@ if __name__ == "__main__":
         val_every, 
         save_dir, 
         save_name)
+    
+    wandb.finish()

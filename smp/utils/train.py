@@ -33,9 +33,11 @@ def train(model,
             # gpu 연산을 위해 device 할당
             images, masks = images.cuda(), masks.cuda()
             model = model.cuda()
-            
+
             # inference
-            outputs = model(images)['out']
+            outputs = model(images)
+            ## torchvision
+            # outputs = model(images)['out']
             
             # loss 계산
             loss = criterion(outputs, masks)
@@ -89,8 +91,10 @@ def validation(epoch,
         for step, (images, masks) in tqdm(enumerate(data_loader), total=len(data_loader)):
             images, masks = images.cuda(), masks.cuda()         
             model = model.cuda()
-            
-            outputs = model(images)['out']
+
+            outputs = model(images)
+            ## torchvision
+            # outputs = model(images)['out']
             
             output_h, output_w = outputs.size(-2), outputs.size(-1)
             mask_h, mask_w = masks.size(-2), masks.size(-1)
@@ -111,6 +115,7 @@ def validation(epoch,
             dices.append(dice)
                 
     dices = torch.cat(dices, 0)
+    print('dices', dices)
     dices_per_class = torch.mean(dices, 0)
     dice_str = [
         f"{c:<12}: {d.item():.4f}"
