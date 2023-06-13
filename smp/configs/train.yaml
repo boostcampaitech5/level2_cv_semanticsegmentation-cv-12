@@ -1,0 +1,29 @@
+# 학습 이름(checkpoint, wandb 업로드명)
+exp_name: test
+# Seed
+seed: 18
+# Dice Threshold
+threshold: 0.5
+# Epoch 설정
+epoch: 3
+# 모델 컴파일(Pytorch 2.0부터 가능)
+compile: False
+
+batch_size: 8
+num_workers: 4
+make_pickle: False
+
+k-fold: True
+fold: 5
+
+# loss 추가
+loss: calc_loss
+
+resume: "/opt/ml/input/baseline_gd/checkpoints/test-1/best-v1.ckpt"
+# resume: None
+
+# # dataset 경로
+
+defaults:
+    - model: unet++-adam-cosinelr-efficient_b7
+    - augmentation: base
