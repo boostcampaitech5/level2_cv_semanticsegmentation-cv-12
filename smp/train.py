@@ -54,7 +54,7 @@ def main(cfg: DictConfig):
         exp_name = cfg["exp_name"] if fold_idx == 0 else f"{cfg['exp_name']}-{fold_idx}"
         
         # Lightning의 WandbLogger 사용 (from lightning.pytorch.loggers import WandbLogger)
-        logger = [WandbLogger(project="semantic-segmentation", name=str(cfg["exp_name"]), entity='ganddddi_datacentric', config=cfg)]
+        logger = [WandbLogger(project="Semantic Segmentation", name=str(cfg["exp_name"]), entity='ganddddi_Segmentation', config=cfg)]
         
         # Lightning의 callback 관련 모듈을 리스트로 묶어준다. - (from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint, RichProgressBar)
         callbacks = [
@@ -68,7 +68,7 @@ def main(cfg: DictConfig):
                 save_weights_only=False,
             ),
             LearningRateMonitor(logging_interval="epoch"),
-            EarlyStopping(monitor="Valid Dice", patience=5, mode="max"),
+            EarlyStopping(monitor="Valid Dice", patience=20, mode="max"),
         ]
         
         # Lighning의 Trainer 모델 사용 - (from lightning import Trainer)
