@@ -1,0 +1,19 @@
+# backhand_aug.yaml
+resize:
+    _target_: albumentations.Resize # 적용하고자 하는 augmentation
+    height: 512 # Resize의 height 인자
+    width: 512 # Resize의 width 인자
+transforms_Crop:
+    _target_: albumentations.augmentations.crops.transforms.Crop
+    x_min: 200
+    y_min: 300
+    x_max: 400
+    y_max: 450
+transforms_CropAndPad:
+    _target_: albumentations.crops.transforms.CropAndPad
+    px:
+      - 300
+      - 112
+      - 72
+      - 200
+    keep_size: False    
