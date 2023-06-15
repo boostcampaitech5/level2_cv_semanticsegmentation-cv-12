@@ -5,15 +5,15 @@ resize:
     width: 512 # Resize의 width 인자
 transforms_Crop:
     _target_: albumentations.augmentations.crops.transforms.Crop
-    x_min: 200
+    x_min: 181
     y_min: 300
-    x_max: 400
+    x_max: 331
     y_max: 450
 transforms_CropAndPad:
     _target_: albumentations.crops.transforms.CropAndPad
     px:
       - 300
-      - 112
-      - 72
-      - 200
+      - 181
+      - 62
+      - 181
     keep_size: False    
