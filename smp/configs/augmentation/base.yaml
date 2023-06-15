@@ -1,4 +1,5 @@
+# backhand_aug.yaml
 resize:
-    _target_: albumentations.Resize
-    height: 512
-    width: 512
+    _target_: albumentations.Resize 
+    height: 512 
+    width: 512 

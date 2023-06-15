@@ -21,8 +21,7 @@ from data.data_module import DataModule, NewXRayDataset, preprocessing
 @hydra.main(version_base=None, config_path="configs", config_name="train")
 def main(cfg: DictConfig):
     L.seed_everything(cfg["seed"])
-    os.makedirs(f"/opt/ml/directory/baseline/checkpoints/{cfg['exp_name']}", exist_ok=True)
-        
+    
     # pickle 파일 생성
     pngs, pkls = preprocessing(make=cfg["make_pickle"])
 
@@ -37,6 +36,7 @@ def main(cfg: DictConfig):
         train_data = (pngs[train_idx], pkls[train_idx])
         valid_data = (pngs[valid_idx], pkls[valid_idx])
 
+        # Augmentation
         transforms = A.Compose([instantiate(aug) for _, aug in cfg["augmentation"].items()])
 
         train_dataset = NewXRayDataset(train_data, train=True, transforms=transforms)
@@ -54,7 +54,7 @@ def main(cfg: DictConfig):
         exp_name = cfg["exp_name"] if fold_idx == 0 else f"{cfg['exp_name']}-{fold_idx}"
         
         # Lightning의 WandbLogger 사용 (from lightning.pytorch.loggers import WandbLogger)
-        logger = [WandbLogger(project="Semantic Segmentation", name=str(cfg["exp_name"]), entity='ganddddi_datacentric', config=cfg)]
+        logger = [WandbLogger(project="Semantic Segmentation", name=str(cfg["exp_name"]), entity='ganddddi_segmentation', config=cfg)]
         
         # Lightning의 callback 관련 모듈을 리스트로 묶어준다. - (from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint, RichProgressBar)
         callbacks = [
