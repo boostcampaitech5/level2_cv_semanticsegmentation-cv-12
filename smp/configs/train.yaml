@@ -1,0 +1,29 @@
+# 학습 이름(checkpoint, wandb 업로드명)
+exp_name: hm_unet++-adam-cosinelr-tfefficient
+# Seed
+seed: 18
+# Dice Threshold
+threshold: 0.5
+# Epoch 설정
+epoch: 200
+# 모델 컴파일(Pytorch 2.0부터 가능)
+compile: False
+
+batch_size: 2
+num_workers: 4
+make_pickle: False
+
+k-fold: True
+fold: 5
+
+# loss 추가
+loss: focal_dice_loss
+
+resume: "/opt/ml/input/code/smp/checkpoints/hm_unet++-adam-cosinelr-tfefficient/best-v1.ckpt"
+# resume: None
+
+# # dataset 경로
+
+defaults:
+    - model: unet++-adam-cosinelr-tfefficient
+    - augmentation: base
