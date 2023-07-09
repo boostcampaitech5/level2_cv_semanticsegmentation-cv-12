@@ -40,14 +40,14 @@
     - AdamW
     - CosineAnnealingLR
 - **각 fold의 손등 class(성능이 낮은 class) 모델을 soft voting ensemble로 성능 향상 후 5개의 fold를 hard voting ensemble로 최종 성능 향상**
-    ![Alt text](image.png)
+    ![Alt text](img/image.png)
 # 🏆Result
 - public(0.9726) 9등
 - private(0.9733) 최종 8등
 
-![Alt text](image-1.png)
+![Alt text](img/image-1.png)
 
-![Alt text](image-2.png)
+![Alt text](img/image-2.png)
 
 
 # 👨‍🌾  팀 구성 및 역할
